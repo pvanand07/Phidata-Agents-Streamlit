@@ -201,7 +201,7 @@ def main() -> None:
                 edited_content = st_quill(
                     value=html_content,
                     placeholder="Edit the response...",
-                    html=True
+                    html=False
                 )
 
             else:
