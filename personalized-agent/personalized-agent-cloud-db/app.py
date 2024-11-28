@@ -91,7 +91,7 @@ def main() -> None:
 
     # Enable Calculator
     if "calculator_enabled" not in st.session_state:
-        st.session_state["calculator_enabled"] = True
+        st.session_state["calculator_enabled"] = False
     # Get calculator_enabled from session state if set
     calculator_enabled = st.session_state["calculator_enabled"]
     # Checkbox for enabling calculator
@@ -103,7 +103,7 @@ def main() -> None:
 
     # Enable file tools
     if "file_tools_enabled" not in st.session_state:
-        st.session_state["file_tools_enabled"] = True
+        st.session_state["file_tools_enabled"] = False
     # Get file_tools_enabled from session state if set
     file_tools_enabled = st.session_state["file_tools_enabled"]
     # Checkbox for enabling shell tools
@@ -115,7 +115,7 @@ def main() -> None:
 
     # Enable Web Search via DuckDuckGo
     if "ddg_search_enabled" not in st.session_state:
-        st.session_state["ddg_search_enabled"] = True
+        st.session_state["ddg_search_enabled"] = False
     # Get ddg_search_enabled from session state if set
     ddg_search_enabled = st.session_state["ddg_search_enabled"]
     # Checkbox for enabling web search
@@ -127,7 +127,7 @@ def main() -> None:
 
     # Enable finance tools
     if "finance_tools_enabled" not in st.session_state:
-        st.session_state["finance_tools_enabled"] = True
+        st.session_state["finance_tools_enabled"] = False
     # Get finance_tools_enabled from session state if set
     finance_tools_enabled = st.session_state["finance_tools_enabled"]
     # Checkbox for enabling shell tools
