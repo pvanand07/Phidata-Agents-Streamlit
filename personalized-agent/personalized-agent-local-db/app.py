@@ -41,7 +41,7 @@ def main() -> None:
         return
 
     # Get the LLM to use
-    llm_id = st.sidebar.selectbox("Select LLM", options=["gpt-4o", "gpt-4-turbo"])
+    llm_id = st.sidebar.selectbox("Select LLM", options=["gpt-4o-mini", "gpt-4o"])
     # Set assistant_type in session state
     if "llm_id" not in st.session_state:
         st.session_state["llm_id"] = llm_id
