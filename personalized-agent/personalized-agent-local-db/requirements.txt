@@ -16,3 +16,4 @@ matplotlib
 streamlit-quill
 markdown2
 lancedb
+tantivy
