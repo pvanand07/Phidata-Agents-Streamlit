@@ -1,0 +1,8 @@
+phi-workspace
+*.db
+*.env
+__pycache__
+scratch
+.venv
+.history
+.vscode
