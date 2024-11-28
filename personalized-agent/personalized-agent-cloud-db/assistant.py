@@ -1,5 +1,5 @@
 import dotenv
-dotenv.load_dotenv("D:/DEV/LIZMOTORS/PHIDATA/personalized/secrets.env")
+dotenv.load_dotenv("D:/DEV/LIZMOTORS/PHIDATA/personalized-agent/personalized-agent-cloud-db/secrets.env")
 import os
 from pathlib import Path
 from textwrap import dedent

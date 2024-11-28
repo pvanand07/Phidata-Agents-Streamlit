@@ -11,8 +11,6 @@ from phi.utils.log import logger
 import os
 
 from assistant import get_personalized_assistant  # type: ignore
-from phi.assistant.assistant import Assistant  # Fix import
-from phi.document.base import Document  # Fix import
 
 nest_asyncio.apply()
 st.set_page_config(
@@ -27,45 +25,6 @@ with st.expander(":rainbow[:point_down: How to use]"):
     st.markdown("- I live in New York so always include a New York reference in the response")
     st.markdown("- I like dogs so always include a dog pun in the response")
 
-# Add cached function for creating assistant
-@st.cache_resource(show_spinner=False)
-def get_cached_assistant(
-    llm_id: str,
-    user_id: str,
-    run_id: str | None = None,
-    calculator: bool = True,
-    ddg_search: bool = True,
-    file_tools: bool = True,
-    finance_tools: bool = True,
-    python_assistant: bool = False,
-    research_assistant: bool = False,
-) -> Assistant:
-    """Cached function to create and return an assistant"""
-    return get_personalized_assistant(
-        llm_id=llm_id,
-        user_id=user_id,
-        run_id=run_id,
-        calculator=calculator,
-        ddg_search=ddg_search,
-        file_tools=file_tools,
-        finance_tools=finance_tools,
-        python_assistant=python_assistant,
-        research_assistant=research_assistant,
-    )
-
-# Add cached function for reading PDFs
-@st.cache_data(show_spinner=False)
-def read_pdf(file) -> List[Document]:
-    """Cached function to read PDF files"""
-    reader = PDFReader()
-    return reader.read(file)
-
-# Add cached function for reading websites
-@st.cache_data(show_spinner=False)
-def read_website(url: str) -> List[Document]:
-    """Cached function to read websites"""
-    scraper = WebsiteReader(max_links=2, max_depth=1)
-    return scraper.read(url)
 
 def main() -> None:
     # Get username
@@ -91,7 +50,7 @@ def main() -> None:
 
     # Enable Calculator
     if "calculator_enabled" not in st.session_state:
-        st.session_state["calculator_enabled"] = False
+        st.session_state["calculator_enabled"] = True
     # Get calculator_enabled from session state if set
     calculator_enabled = st.session_state["calculator_enabled"]
     # Checkbox for enabling calculator
@@ -103,7 +62,7 @@ def main() -> None:
 
     # Enable file tools
     if "file_tools_enabled" not in st.session_state:
-        st.session_state["file_tools_enabled"] = False
+        st.session_state["file_tools_enabled"] = True
     # Get file_tools_enabled from session state if set
     file_tools_enabled = st.session_state["file_tools_enabled"]
     # Checkbox for enabling shell tools
@@ -115,7 +74,7 @@ def main() -> None:
 
     # Enable Web Search via DuckDuckGo
     if "ddg_search_enabled" not in st.session_state:
-        st.session_state["ddg_search_enabled"] = False
+        st.session_state["ddg_search_enabled"] = True
     # Get ddg_search_enabled from session state if set
     ddg_search_enabled = st.session_state["ddg_search_enabled"]
     # Checkbox for enabling web search
@@ -127,7 +86,7 @@ def main() -> None:
 
     # Enable finance tools
     if "finance_tools_enabled" not in st.session_state:
-        st.session_state["finance_tools_enabled"] = False
+        st.session_state["finance_tools_enabled"] = True
     # Get finance_tools_enabled from session state if set
     finance_tools_enabled = st.session_state["finance_tools_enabled"]
     # Checkbox for enabling shell tools
@@ -176,7 +135,7 @@ def main() -> None:
     personalized_assistant: Assistant
     if "personalized_assistant" not in st.session_state or st.session_state["personalized_assistant"] is None:
         logger.info(f"---*--- Creating {llm_id} Assistant ---*---")
-        personalized_assistant = get_cached_assistant(
+        personalized_assistant = get_personalized_assistant(
             llm_id=llm_id,
             user_id=user_id,
             calculator=calculator_enabled,
@@ -254,7 +213,8 @@ def main() -> None:
             if input_url is not None:
                 alert = st.sidebar.info("Processing URLs...", icon="ℹ️")
                 if f"{input_url}_scraped" not in st.session_state:
-                    web_documents: List[Document] = read_website(input_url)
+                    scraper = WebsiteReader(max_links=2, max_depth=1)
+                    web_documents: List[Document] = scraper.read(input_url)
                     if web_documents:
                         personalized_assistant.knowledge_base.load_documents(web_documents, upsert=True)
                     else:
@@ -273,7 +233,8 @@ def main() -> None:
             alert = st.sidebar.info("Processing PDF...", icon="🧠")
             file_name = uploaded_file.name.split(".")[0]
             if f"{file_name}_uploaded" not in st.session_state:
-                file_documents: List[Document] = read_pdf(uploaded_file)
+                reader = PDFReader()
+                file_documents: List[Document] = reader.read(uploaded_file)
                 if file_documents:
                     personalized_assistant.knowledge_base.load_documents(file_documents, upsert=True)
                 else:
@@ -291,7 +252,7 @@ def main() -> None:
         new_assistant_run_id = st.sidebar.selectbox("Run ID", options=assistant_run_ids)
         if st.session_state["assistant_run_id"] != new_assistant_run_id:
             logger.info(f"---*--- Loading {llm_id} run: {new_assistant_run_id} ---*---")
-            st.session_state["personalized_assistant"] = get_cached_assistant(
+            st.session_state["personalized_assistant"] = get_personalized_assistant(
                 llm_id=llm_id,
                 user_id=user_id,
                 run_id=new_assistant_run_id,

@@ -248,33 +248,22 @@ def main() -> None:
             st.sidebar.success("Knowledge base cleared")
 
     if personalized_assistant.storage:
-        conversation_starters = get_conversation_starters(
-            personalized_assistant.storage, 
-            user_id=user_id
-        )
-        
-        if len(conversation_starters) > 0:
-            selected_index = st.sidebar.selectbox(
-                "Previous Conversations",
-                options=range(len(conversation_starters)),
-                format_func=lambda i: conversation_starters[i]["message"]
+        assistant_run_ids: List[str] = personalized_assistant.storage.get_all_run_ids(user_id=user_id)
+        new_assistant_run_id = st.sidebar.selectbox("Run ID", options=assistant_run_ids)
+        if st.session_state["assistant_run_id"] != new_assistant_run_id:
+            logger.info(f"---*--- Loading {llm_id} run: {new_assistant_run_id} ---*---")
+            st.session_state["personalized_assistant"] = get_personalized_assistant(
+                llm_id=llm_id,
+                user_id=user_id,
+                run_id=new_assistant_run_id,
+                calculator=calculator_enabled,
+                ddg_search=ddg_search_enabled,
+                file_tools=file_tools_enabled,
+                finance_tools=finance_tools_enabled,
+                python_assistant=python_assistant_enabled,
+                research_assistant=research_assistant_enabled,
             )
-            
-            new_assistant_run_id = conversation_starters[selected_index]["run_id"]
-            if st.session_state["assistant_run_id"] != new_assistant_run_id:
-                logger.info(f"---*--- Loading {llm_id} run: {new_assistant_run_id} ---*---")
-                st.session_state["personalized_assistant"] = get_personalized_assistant(
-                    llm_id=llm_id,
-                    user_id=user_id,
-                    run_id=new_assistant_run_id,
-                    calculator=calculator_enabled,
-                    ddg_search=ddg_search_enabled,
-                    file_tools=file_tools_enabled,
-                    finance_tools=finance_tools_enabled,
-                    python_assistant=python_assistant_enabled,
-                    research_assistant=research_assistant_enabled,
-                )
-                st.rerun()
+            st.rerun()
 
     # Show Assistant memory
     with st.status("Assistant Memory", expanded=False, state="complete"):
@@ -298,35 +287,6 @@ def restart_assistant():
     if "file_uploader_key" in st.session_state:
         st.session_state["file_uploader_key"] += 1
     st.rerun()
-
-
-@st.cache_data(ttl="1h")
-def get_messages_for_run(storage, run_id: str):
-    """Cache messages for each run to avoid repeated database calls"""
-    return storage.get_messages(run_id)
-
-@st.cache_data(ttl="1h")
-def get_conversation_starters(storage, user_id: str) -> List[dict]:
-    """Cache conversation starters to avoid repeated processing"""
-    assistant_run_ids = storage.get_all_run_ids(user_id=user_id)
-    conversation_starters = []
-    
-    for run_id in assistant_run_ids:
-        messages = get_messages_for_run(storage, run_id)
-        for message in messages:
-            if message.get("role") == "user":
-                conversation_starters.append({
-                    "run_id": run_id, 
-                    "message": message.get("content", "")[:50] + "..."
-                })
-                break
-        else:
-            conversation_starters.append({
-                "run_id": run_id, 
-                "message": f"Conversation {len(conversation_starters)}"
-            })
-    
-    return conversation_starters
 
 
 main()

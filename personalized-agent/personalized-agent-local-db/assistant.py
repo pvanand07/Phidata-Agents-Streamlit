@@ -17,7 +17,7 @@ from phi.memory.db.sqlite import SqliteMemoryDb
 from phi.storage.assistant.sqllite import SqlAssistantStorage
 import dotenv
 
-dotenv.load_dotenv("D:/DEV/LIZMOTORS/PHIDATA/personalized/secrets.env")
+dotenv.load_dotenv("D:\DEV\LIZMOTORS\PHIDATA\personalized-agent\personalized-agent-local-db\secrets.env")
 
 
 db_url = "sqlite:///personalized_assistant.db"
