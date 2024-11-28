@@ -13,3 +13,6 @@ yfinance
 duckdb
 pandas
 matplotlib
+streamlit-quill
+markdown2
+lancedb

@@ -11,6 +11,8 @@ from phi.utils.log import logger
 import os
 
 from assistant import get_personalized_assistant  # type: ignore
+from streamlit_quill import st_quill
+import markdown2
 
 nest_asyncio.apply()
 st.set_page_config(
@@ -19,6 +21,9 @@ st.set_page_config(
 )
 st.title("Personalized Agentic RAG")
 st.markdown("##### :orange_heart: built using [phidata](https://github.com/phidatahq/phidata)")
+
+if "edit_mode" not in st.session_state:
+    st.session_state["edit_mode"] = False
 
 with st.expander(":rainbow[:point_down: How to use]"):
     st.markdown("Tell the Assistant about your preferences and they will remember them across conversations.")
@@ -185,7 +190,22 @@ def main() -> None:
         if message["role"] == "system":
             continue
         with st.chat_message(message["role"]):
-            st.write(message["content"])
+            # Check if this is the last assistant message and edit mode is on
+            is_last_assistant = (message["role"] == "assistant" and 
+                               message == st.session_state["messages"][-1] and 
+                               st.session_state["edit_mode"])
+            
+            if is_last_assistant:
+                # Convert markdown to HTML for Quill
+                html_content = markdown2.markdown(message["content"])
+                edited_content = st_quill(
+                    value=html_content,
+                    placeholder="Edit the response...",
+                    html=True
+                )
+
+            else:
+                st.write(message["content"])
 
     # If last message is from a user, generate a new response
     last_message = st.session_state["messages"][-1]
@@ -276,6 +296,11 @@ def main() -> None:
 
     if st.sidebar.button("New Run"):
         restart_assistant()
+
+    if len(st.session_state["messages"]) > 0 and st.session_state["messages"][-1]["role"] == "assistant":
+        if st.sidebar.button("Toggle Edit Mode"):
+            st.session_state["edit_mode"] = not st.session_state["edit_mode"]
+            st.rerun()
 
 
 def restart_assistant():
